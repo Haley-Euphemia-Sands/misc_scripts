@@ -1,0 +1,32 @@
+#!/bin/bash
+input=$1; output=$2; crf=$3; delete=$4; remove=''; workdir=$5;
+cd $workdir;
+case $delete in
+	"1") 
+		remove=1
+		;;
+	"t") 
+		remove=1
+		;;
+	"T")
+		remove=1
+		;;
+	"true") 
+		remove=1
+		;;
+	*)
+		echo "no remove" >&2
+		;;
+esac
+
+case $remove in	
+	"1")
+                ffmpeg -i "$input" -c:v libaom-av1 -crf $crf -an -pass 1 -f null /dev/null &&\
+                        ffmpeg -i "$input" -c:v libaom-av1 -crf $crf -c:a libopus -pass 2 "$output" &&
+			rm -v "$input"
+		;;
+	*)
+		ffmpeg -i "$input" -c:v libaom-av1 -crf $crf -an -pass 1 -f null /dev/null &&\
+			ffmpeg -i "$input" -c:v libaom-av1 -crf $crf -c:a libopus -pass 2 "$output"
+		;;
+esac

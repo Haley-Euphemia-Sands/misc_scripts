@@ -1,0 +1,10 @@
+#!/bin/bash
+extension=$1
+workingdir=$2
+cd $workingdir;
+
+
+for f in *".$extension"; do 
+	rm -v ffmpeg2pass-0.log;
+	/media/sysm/Code/Projects/scripts/ffmpeg-wrapper "$f" "$f.mkv" 28 false $(pwd);
+done
