@@ -21,7 +21,7 @@ case $? in
 esac
 
 snapshot_description="$(date +"%Y-%m-%d %T") - Snapshot before Pulling all git repositories cloned to reference directory"
-snapper -c Code create -c number -d $snapshot_description
+snapper -c Code create -c number -d "$snapshot_description"
 
 case $? in
 	"0")
@@ -30,7 +30,7 @@ case $? in
 			cd "$m" && 
 				for f in *; do 
 					cd "$f" && 
-					git pull >> /media/sysm/Logs/git.log 2>&1;
+					git pull 2>&1 | tee -a /media/sysm/Logs/git.log || printf "$(date +"%Y-%m-%d %T") - issue with repo $f \n" >> /media/sysm/Logs/git-pull-all.log;
 					cd ..; 
 				done; 
 				cd ..; 
