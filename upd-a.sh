@@ -1,5 +1,5 @@
 #/bin/bash
-upd-mddl;
+mangadex-dl --update;
 pip install -U yt-dlp;
 pip install -U himawari-api;
 flatpak update;
