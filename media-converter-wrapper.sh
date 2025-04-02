@@ -3,10 +3,6 @@
 mkdir -p /media/sysm/Logs/media\ script/ && touch /media/sysm/Logs/media\ script/media_to_media.log #makes sure the log dir and file exists
 export log_file=/media/sysm/Logs/media\ script/media_to_media.log
 
-## Arg 1 = input format, Arg 2 = Output format, Quality, Quality type
-input_format=$1; output_format=$2; quality=$3; quality_mode=$4; 
-
-
 help(){
 	printf "$(date +"%Y-%m-%d %T") - Help Function Called\n" >> $log_file
 	printf "" >&2
@@ -33,6 +29,23 @@ check_args(){
 	fi
 }
 
+convert_ffmpeg(){
+    input_extesions=$1; video_codec=$2; quality_flag=$3; audio_codec=$4; output_extension=$5;
+    for input_files in $input_extesions; do
+        ffmpeg -i "$input_files" $video_codec $quality_flag -preset slow -an -pass 1 -f null /dev/null && \
+            ffmpeg -i "$input_files" $video_codec $quality_flag -preset slow $audio_codec -pass 2 "$input_files$output_extension"
+        ffmpeg_exit_status=$?
+        if [ $ffmpeg_exit_status != 0 ]; then
+            printf "$(date +"%Y-%m-%d %T") - ffmpeg failed with exit code $ffmpeg_exit_status\n" > $log_file
+            exit 6 # Exit Code 6 - ffmpeg failed.
+        else
+            cat /dev/null > ffmpeg2pass*; # truncates the two pass log ready for another loop
+        fi
+    done
+    rm ffmpeg2pass* # removes the two pass log to clean up
+}
+## Arg 1 = input format, Arg 2 = Output format, Quality, Quality type
+input_format=$1; output_format=$2; quality=$3; quality_mode=$4; 
 printf "$(date +"%Y-%m-%d %T") - Current Working Directory: $(pwd)\n" >> $log_file
 printf "$(date +"%Y-%m-%d %T") - input_format = $input_format, output_format = $output_format, quality = $quality, quality_mode = $quality_mode\n" >> $log_file
 
@@ -44,6 +57,87 @@ fi
 check_args $input_format $output_format $quality $quality_mode
 if [ $? != 0 ]; then
         printf "$(date +"%Y-%m-%d %T") - checking arguments failed.\n" >> $log_file
-        exit 3 # Exit Code 4 - Check argument call has failed.
+        exit 4 # Exit Code 4 - Check argument call has failed.
 fi
-
+# check and errors out if input format will be the same as output as not handle has been implemented yet but is planned.
+if [ $input_format = $output_format ]; then
+	printf  "$(date +"%Y-%m-%d %T") - Conversion to same format is not supported yet.\n" >> $log_file
+	exit 5
+fi
+case $output_format in
+    "avif")
+        if [ $quality != "archive-preset" ]; then
+            case $quality_mode in
+                "abr")
+                    quality_flag="-b:v $quality"
+                    video_codec="-c:v av1_nvenc"
+                    audio_codec="-an"
+                    output_extension=".av1_$quality-br.avif"
+                    ;;
+                "crf")
+                    printf "$(date +"%Y-%m-%d %T") - nvenc encoder will not be used, crf is not supported by it, fallback on libaom-av1 encoder.\n" >> $log_file
+                    quality_flag="-crf $quality"
+                    video_codec="-c:v libaom-av1"
+                    audio_codec="-an"
+                    output_extension=".av1-$quality-crf.avif"
+                    ;;
+                "qp")
+                    quality_flag="-qp $quality"
+                    video_codec="-c:v av1_nvenc"
+                    audio_codec="-an"
+                    output_extension=".av1_$quality-qp.avif"
+                    ;;
+            esac
+        else
+            #put in preset
+        fi
+        ;;    
+    "mkv")
+        if [ $quality != "archive-preset" ]; then
+            case $quality_mode in
+                "abr")
+                    quality_flag="-b:v $quality"
+                    video_codec="-c:v av1_nvenc"
+                    audio_codec="-c:a libopus -b:a 160k"
+                    output_extension=".av1_$quality-br.opus-160k-abr.mkv"
+                    ;;
+                "crf")
+                    printf "$(date +"%Y-%m-%d %T") - nvenc encoder will not be used, crf is not supported by it, fallback on libaom-av1 encoder.\n" >> $log_file
+                    quality_flag="-crf $quality"
+                    video_codec="-c:v libaom-av1"
+                    audio_codec="-c:a libopus -b:a 160k"
+                    output_extension=".av1-$quality-crf.opus-160k-abr.mkv"
+                    ;;
+                "qp")
+                    quality_flag="-qp $quality"
+                    video_codec="-c:v av1_nvenc"
+                    audio_codec="-c:a libopus -b:a 160k"
+                    output_extension=".av1_$quality-qp.opus-160k-abr.mkv"
+                    ;;
+            esac
+        ;;
+    "mp4")
+        printf "$(date +"%Y-%m-%d %T") - AV1 is not a supported Video Codec for this Container, fallback on HEVC encoder.\n" >> $log_file
+        ;;
+    *)
+        printf "$(date +"%Y-%m-%d %T") - Invalid Output Format Supplied\n" >> $log_file
+        ;;
+esac
+     
+case $input_format in
+	"jpeg")
+        ;;
+	"png")
+		;;
+	"mp4")
+		;;
+	"mkv")
+		;;
+	"gif")
+		;;
+	*)
+		printf "$(date +"%Y-%m-%d %T") - no valid input format supplied\n" >> $log_file
+		exit 5 # Exit Code 5 - No Valid Input.
+		;;
+esac
+exit 0
