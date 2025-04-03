@@ -30,7 +30,7 @@ case $? in
 			cd "$m" && 
 				for f in *; do 
 					cd "$f" && 
-					git pull 2>&1 | tee -a /media/sysm/Logs/git.log || printf "$(date +"%Y-%m-%d %T") - issue with repo $f \n" >> /media/sysm/Logs/git-pull-all.log;
+					git pull --recurse-submodules 2>&1 | tee -a /media/sysm/Logs/git.log || printf "$(date +"%Y-%m-%d %T") - issue with repo $f \n" >> /media/sysm/Logs/git-pull-all.log;
 					cd ..; 
 				done; 
 				cd ..; 
