@@ -74,13 +74,13 @@ check_args(){
 }
 
 convert_ffmpeg(){
-    input_extesions=$1; video_codec=$2; quality_flag=$3; audio_codec=$4; output_extension=$5;
-    for input_files in $input_extesions; do
+    input_extension=$1; video_codec=$2; quality_flag=$3; audio_codec=$4; output_extension=$5;
+    for input_files in $input_extension; do
         ffmpeg -i "$input_files" $video_codec $quality_flag -preset slow -an -pass 1 -f null /dev/null && \
             ffmpeg -i "$input_files" $video_codec $quality_flag -preset slow $audio_codec -pass 2 "$input_files$output_extension"
         ffmpeg_exit_status=$?
         if [ $ffmpeg_exit_status != 0 ]; then
-            printf "$(date +"%Y-%m-%d %T") - ffmpeg failed with exit code $ffmpeg_exit_status\n" > /media/sysm/Logs/media\ script/media_to_media.log
+            printf "$(date +"%Y-%m-%d %T") - ffmpeg failed with exit code $ffmpeg_exit_status\n" >> /media/sysm/Logs/media\ script/media_to_media.log
             exit 6 # Exit Code 6 - ffmpeg failed.
         else
             cat /dev/null > ffmpeg2pass*; # truncates the two pass log ready for another loop
