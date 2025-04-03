@@ -172,26 +172,26 @@ esac
      
 case $input_format in
 	"jpeg")
-        input_extensions=""
+        input_extension=""
         if [ "$(ls -alh | grep .jpg)" != "" ]; then
             input_extension+="*.jpg "
         fi
         if [ "$(ls -alh | grep .jpeg)" != "" ]; then
             input_extension+="*.jpeg "
         fi
-        if [ $input_extensions == "" ]; then
+        if [ $input_extension == "" ]; then
             ext_empty
         fi
         ;;
 	"png")
         input_extension=""
         if [ "$(ls -alh | grep .bmp)" != "" ]; then
-             input_extensions+="*.bmp "
+             input_extension+="*.bmp "
         fi
         if [ "$(ls -alh | grep .png)" != "" ]; then 
-            input_extensions+="*.png "
+            input_extension+="*.png "
         fi
-        if [ $input_extensions == "" ]; then
+        if [ $input_extension == "" ]; then
             ext_empty
         fi
 		;;
@@ -230,4 +230,5 @@ case $input_format in
 		exit 5 # Exit Code 5 - No Valid Input.
 		;;
 esac
+convert_ffmpeg $input_extension $video_codec $quality_flag $audio_codec $output_extension
 exit 0
