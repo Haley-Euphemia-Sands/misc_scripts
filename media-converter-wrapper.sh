@@ -23,7 +23,7 @@ check_help(){
 }
 
 check_args(){
-	if [ $1 || $2 || $3 || $4 = "" ]; then
+	if [ $1 || $2 || $3 || $4 == "" ]; then
 		return 0
 	else
 		printf "$(date +"%Y-%m-%d %T") - Incorrect number of arguments supplied.\n" >> /media/sysm/Logs/media\ script/media_to_media.log
