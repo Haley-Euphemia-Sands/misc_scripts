@@ -20,8 +20,8 @@ case $? in
 		;;
 esac
 
-#snapshot_description="$(date +"%Y-%m-%d %T") - Snapshot before Pulling all git repositories cloned to reference directory"
-#snapper -c Code create -c number -d "$snapshot_description"
+snapshot_description="$(date +"%Y-%m-%d %T") - Snapshot before Pulling all git repositories cloned to reference directory"
+snapper -c Code create -c number -d "$snapshot_description"
 
 case $? in
 	"0")
