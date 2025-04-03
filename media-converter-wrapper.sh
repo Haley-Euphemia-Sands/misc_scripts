@@ -9,6 +9,10 @@ help(){
 	exit 2 # Exit Code 2 = Exit after help supplied.
 }
 
+ext_empty(){
+    printf "$(date +"%Y-%m-%d %T") - No files exist with extensions associated with jpeg.\n" >> $log_file
+    exit 7 # Exit Code 7 - Can't have Empty Extensions.
+}
 
 check_help(){
 	if [ $1 || $2 || $3 || $4 = "-h" || "--help" ]; then
@@ -126,14 +130,57 @@ esac
      
 case $input_format in
 	"jpeg")
+        input_extensions=""
+        if [ "$(ls -alh | grep .jpg)" != "" ]; then
+            input_extension+="*.jpg "
+        fi
+        if [ "$(ls -alh | grep .jpeg)" != "" ]; then
+            input_extension+="*.jpeg "
+        fi
+        if [ $input_extensions == "" ]; then
+            ext_empty
+        fi
         ;;
 	"png")
+        input_extension=""
+        if [ "$(ls -alh | grep .bmp)" != "" ]; then
+             input_extensions+="*.bmp "
+        fi
+        if [ "$(ls -alh | grep .png)" != "" ]; then 
+            input_extensions+="*.png "
+        fi
+        if [ $input_extensions == "" ]; then
+            ext_empty
 		;;
 	"mp4")
+        input_extension=""
+        if [ "$(ls -alh | grep .mp4)" != "" ]; then
+            input_extension+="*.mp4 "
+        fi
+        if [ "$(ls -alh | grep .m4a)" != "" ]; then
+            input_extension+="*.m4v "
+        fi
+        if [ $input_extension == "" ]; then
+            ext_empty
+        fi
 		;;
 	"mkv")
+        input_extension=""
+        if [ "$(ls -alh | grep .mkv)" != "" ]; then
+            input_extension+="*.mkv "
+        fi
+        if [ "$(ls -alh | grep .webm)" != "" ]; then
+            input_extension+="*.webm "
+        fi
+        if [ $input_extension == "" ]; then
+            ext_empty
+        fi
 		;;
 	"gif")
+        input_extension="*.gif"
+        if [ "$(ls -alh | grep .gif)" == "" ]; then 
+            ext_empty
+        fi
 		;;
 	*)
 		printf "$(date +"%Y-%m-%d %T") - no valid input format supplied\n" >> $log_file

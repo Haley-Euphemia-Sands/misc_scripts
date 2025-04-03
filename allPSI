@@ -1,7 +1,8 @@
 #!/bin/bash
+
 printf "PSI CPU: \n"; 
 cat /proc/pressure/cpu; 
 printf "\nPSI IO: \n"; 
 cat /proc/pressure/io; 
 printf "\nPSI MEMORY: \n"; 
-cat /proc/pressure/memory;
+cat /proc/pressure/memory
