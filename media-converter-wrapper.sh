@@ -1,22 +1,21 @@
 #!/bin/bash
 
 mkdir -p /media/sysm/Logs/media\ script/ && touch /media/sysm/Logs/media\ script/media_to_media.log #makes sure the log dir and file exists
-export log_file=/media/sysm/Logs/media\ script/media_to_media.log
 
 help(){
-	printf "$(date +"%Y-%m-%d %T") - Help Function Called\n" >> $log_file
+	printf "$(date +"%Y-%m-%d %T") - Help Function Called\n" >> /media/sysm/Logs/media\ script/media_to_media.log
 	printf "" >&2
 	exit 2 # Exit Code 2 = Exit after help supplied.
 }
 
 ext_empty(){
-    printf "$(date +"%Y-%m-%d %T") - No files exist with extensions associated with jpeg.\n" >> $log_file
+    printf "$(date +"%Y-%m-%d %T") - No files exist with extensions associated with jpeg.\n" >> /media/sysm/Logs/media\ script/media_to_media.log
     exit 7 # Exit Code 7 - Can't have Empty Extensions.
 }
 
 check_help(){
 	if [ $1 || $2 || $3 || $4 = "-h" || "--help" ]; then
-		printf "$(date +"%Y-%m-%d %T") - Calling Help Function\n" >> $log_file
+		printf "$(date +"%Y-%m-%d %T") - Calling Help Function\n" >> /media/sysm/Logs/media\ script/media_to_media.log
 		help
 	else
 		return 0
@@ -27,7 +26,7 @@ check_args(){
 	if [ $1 || $2 || $3 || $4 = "" ]; then
 		return 0
 	else
-		printf "$(date +"%Y-%m-%d %T") - Incorrect number of arguments supplied.\n" >> $log_file
+		printf "$(date +"%Y-%m-%d %T") - Incorrect number of arguments supplied.\n" >> /media/sysm/Logs/media\ script/media_to_media.log
 		printf "Incorrect number of Arguments supplied, please see '-h' or '--help' for help.\n" >&2
 		exit 1 # Exit code 1 means incorrect number of arguments supplied.
 	fi
@@ -40,7 +39,7 @@ convert_ffmpeg(){
             ffmpeg -i "$input_files" $video_codec $quality_flag -preset slow $audio_codec -pass 2 "$input_files$output_extension"
         ffmpeg_exit_status=$?
         if [ $ffmpeg_exit_status != 0 ]; then
-            printf "$(date +"%Y-%m-%d %T") - ffmpeg failed with exit code $ffmpeg_exit_status\n" > $log_file
+            printf "$(date +"%Y-%m-%d %T") - ffmpeg failed with exit code $ffmpeg_exit_status\n" > /media/sysm/Logs/media\ script/media_to_media.log
             exit 6 # Exit Code 6 - ffmpeg failed.
         else
             cat /dev/null > ffmpeg2pass*; # truncates the two pass log ready for another loop
@@ -50,22 +49,22 @@ convert_ffmpeg(){
 }
 ## Arg 1 = input format, Arg 2 = Output format, Quality, Quality type
 input_format=$1; output_format=$2; quality=$3; quality_mode=$4; 
-printf "$(date +"%Y-%m-%d %T") - Current Working Directory: $(pwd)\n" >> $log_file
-printf "$(date +"%Y-%m-%d %T") - input_format = $input_format, output_format = $output_format, quality = $quality, quality_mode = $quality_mode\n" >> $log_file
+printf "$(date +"%Y-%m-%d %T") - Current Working Directory: $(pwd)\n" >> /media/sysm/Logs/media\ script/media_to_media.log
+printf "$(date +"%Y-%m-%d %T") - input_format = $input_format, output_format = $output_format, quality = $quality, quality_mode = $quality_mode\n" >> /media/sysm/Logs/media\ script/media_to_media.log
 
 check_help $input_format $output_format $quality $quality_mode
 if [ $? != 0 ]; then
-	printf "$(date +"%Y-%m-%d %T") - checking help failed.\n" >> $log_file
+	printf "$(date +"%Y-%m-%d %T") - checking help failed.\n" >> /media/sysm/Logs/media\ script/media_to_media.log
 	exit 3 # Exit Code 3 - Check for help call has failed.
 fi
 check_args $input_format $output_format $quality $quality_mode
 if [ $? != 0 ]; then
-        printf "$(date +"%Y-%m-%d %T") - checking arguments failed.\n" >> $log_file
+        printf "$(date +"%Y-%m-%d %T") - checking arguments failed.\n" >> /media/sysm/Logs/media\ script/media_to_media.log
         exit 4 # Exit Code 4 - Check argument call has failed.
 fi
 # check and errors out if input format will be the same as output as not handle has been implemented yet but is planned.
 if [ $input_format = $output_format ]; then
-	printf  "$(date +"%Y-%m-%d %T") - Conversion to same format is not supported yet.\n" >> $log_file
+	printf  "$(date +"%Y-%m-%d %T") - Conversion to same format is not supported yet.\n" >> /media/sysm/Logs/media\ script/media_to_media.log
 	exit 5
 fi
 case $output_format in
@@ -79,7 +78,7 @@ case $output_format in
                     output_extension=".av1_$quality-br.avif"
                     ;;
                 "crf")
-                    printf "$(date +"%Y-%m-%d %T") - nvenc encoder will not be used, crf is not supported by it, fallback on libaom-av1 encoder.\n" >> $log_file
+                    printf "$(date +"%Y-%m-%d %T") - nvenc encoder will not be used, crf is not supported by it, fallback on libaom-av1 encoder.\n" >> /media/sysm/Logs/media\ script/media_to_media.log
                     quality_flag="-crf $quality"
                     video_codec="-c:v libaom-av1"
                     audio_codec="-an"
@@ -106,7 +105,7 @@ case $output_format in
                     output_extension=".av1_$quality-br.opus-160k-abr.mkv"
                     ;;
                 "crf")
-                    printf "$(date +"%Y-%m-%d %T") - nvenc encoder will not be used, crf is not supported by it, fallback on libaom-av1 encoder.\n" >> $log_file
+                    printf "$(date +"%Y-%m-%d %T") - nvenc encoder will not be used, crf is not supported by it, fallback on libaom-av1 encoder.\n" >> /media/sysm/Logs/media\ script/media_to_media.log
                     quality_flag="-crf $quality"
                     video_codec="-c:v libaom-av1"
                     audio_codec="-c:a libopus -b:a 160k"
@@ -121,10 +120,10 @@ case $output_format in
             esac
         ;;
     "mp4")
-        printf "$(date +"%Y-%m-%d %T") - AV1 is not a supported Video Codec for this Container, fallback on HEVC encoder.\n" >> $log_file
+        printf "$(date +"%Y-%m-%d %T") - AV1 is not a supported Video Codec for this Container, fallback on HEVC encoder.\n" >> /media/sysm/Logs/media\ script/media_to_media.log
         ;;
     *)
-        printf "$(date +"%Y-%m-%d %T") - Invalid Output Format Supplied\n" >> $log_file
+        printf "$(date +"%Y-%m-%d %T") - Invalid Output Format Supplied\n" >> /media/sysm/Logs/media\ script/media_to_media.log
         ;;
 esac
      
@@ -183,7 +182,7 @@ case $input_format in
         fi
 		;;
 	*)
-		printf "$(date +"%Y-%m-%d %T") - no valid input format supplied\n" >> $log_file
+		printf "$(date +"%Y-%m-%d %T") - no valid input format supplied\n" >> /media/sysm/Logs/media\ script/media_to_media.log
 		exit 5 # Exit Code 5 - No Valid Input.
 		;;
 esac
