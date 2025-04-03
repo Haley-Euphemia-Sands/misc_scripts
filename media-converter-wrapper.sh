@@ -14,16 +14,57 @@ ext_empty(){
 }
 
 check_help(){
-	if [ $1 || $2 || $3 || $4 = "-h" || "--help" ]; then
-		printf "$(date +"%Y-%m-%d %T") - Calling Help Function\n" >> /media/sysm/Logs/media\ script/media_to_media.log
-		help
-	else
-		return 0
-	fi
+    checker=false
+    case $1 in
+        "-h")
+             checker=true
+             ;;
+         "--help")
+             checker=true
+             ;;
+    esac
+    case $2 in
+        "-h")
+             checker=true
+             ;;
+         "--help")
+             checker=true
+             ;;
+    esac    
+    case $3 in
+        "-h")
+             checker=true
+             ;;
+         "--help")
+             checker=true
+             ;;
+    esac  
+    case $4 in
+        "-h")
+             checker=true
+             ;;
+         "--help")
+             checker=true
+             ;;
+    esac
+    case $checker in
+        "true")
+        		printf "$(date +"%Y-%m-%d %T") - Calling Help Function\n" >> /media/sysm/Logs/media\ script/media_to_media.log
+		    help
+		    ;;
+		"false")
+	        return 0
+	        ;;
+	esac
+	#if [ "$1" || "$2" || "$3" || "$4" == "-h" ] || [ $1 || $2 || $3 || $4 == "--help" ]; then
+
+	#else
+		#return 0
+	#fi
 }
 
 check_args(){
-	if [ $1 || $2 || $3 || $4 == "" ]; then
+	if [ $1 != "" ] || [ $2 != "" ] || [ $3 != "" ]|| [ $4 != "" ]; then
 		return 0
 	else
 		printf "$(date +"%Y-%m-%d %T") - Incorrect number of arguments supplied.\n" >> /media/sysm/Logs/media\ script/media_to_media.log
@@ -57,7 +98,7 @@ if [ $? != 0 ]; then
 	printf "$(date +"%Y-%m-%d %T") - checking help failed.\n" >> /media/sysm/Logs/media\ script/media_to_media.log
 	exit 3 # Exit Code 3 - Check for help call has failed.
 fi
-check_args $input_format $output_format $quality $quality_mode
+check_args "$input_format" "$output_format" "$quality" "$quality_mode"
 if [ $? != 0 ]; then
         printf "$(date +"%Y-%m-%d %T") - checking arguments failed.\n" >> /media/sysm/Logs/media\ script/media_to_media.log
         exit 4 # Exit Code 4 - Check argument call has failed.
@@ -92,7 +133,8 @@ case $output_format in
                     ;;
             esac
         else
-            #put in preset
+            printf "nop" > /dev/null #put in preset
+            exit 0
         fi
         ;;    
     "mkv")
@@ -118,6 +160,7 @@ case $output_format in
                     output_extension=".av1_$quality-qp.opus-160k-abr.mkv"
                     ;;
             esac
+        fi
         ;;
     "mp4")
         printf "$(date +"%Y-%m-%d %T") - AV1 is not a supported Video Codec for this Container, fallback on HEVC encoder.\n" >> /media/sysm/Logs/media\ script/media_to_media.log
@@ -150,6 +193,7 @@ case $input_format in
         fi
         if [ $input_extensions == "" ]; then
             ext_empty
+        fi
 		;;
 	"mp4")
         input_extension=""
